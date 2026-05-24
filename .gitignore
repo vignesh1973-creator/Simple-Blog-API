@@ -1,0 +1,26 @@
+# dependencies
+node_modules/
+
+# build files
+dist/
+
+# environment variables
+.env
+.env.*
+
+# logs
+*.log
+
+# TypeScript cache
+*.tsbuildinfo
+
+# uploads
+uploads/
+
+# OS / editor files
+.DS_Store
+.vscode/
+
+# local database files
+*.db
+*.sqlite
