@@ -4,6 +4,7 @@ interface IBlog extends Document{
     title:string;
     content:string;
     imageUrl?:string;
+    imagePublicId?: string;
     author: Types.ObjectId;
     createdAt: Date;
     updateAt:Date;
@@ -21,6 +22,9 @@ const BlogSchema:Schema<IBlog> = new Schema<IBlog>({
     },
     imageUrl:{
         type:String
+    },
+    imagePublicId: {
+    type: String
     },
     author:{
         type:Schema.Types.ObjectId,

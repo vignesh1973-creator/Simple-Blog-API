@@ -2,8 +2,7 @@ import { Blog } from "../models/Blog.js";
 import type { Response } from "express";
 import type {AuthRequest} from '../middlewares/auth.js';
 import asynchandler from 'express-async-handler';
-import fs from 'fs';
-
+import cloudinary from "../config/cloudinary.js";
 
 const createBlog = asynchandler(async(
     req:AuthRequest,
@@ -22,12 +21,14 @@ const createBlog = asynchandler(async(
         return;
     }
 
-    const imageUrl = req.file ? `/uploads/${req.file.filename}` : undefined;
+    const imageUrl = req.file ?.path;
+    const imagePublicId = req.file ?.filename;
 
     const blog = await Blog.create({
         title,
         content,
         imageUrl,
+        imagePublicId,
         author: req.userId
     })
 
@@ -96,19 +97,31 @@ const updateBlog = asynchandler(async(req:AuthRequest, res:Response)=>{
         if(typeof title === "string") blog.title = title;
         if(typeof content === "string") blog.content = content;
 
-        if(req.file) {
+        // if(req.file) {
 
-            if(blog.imageUrl){
+        //     if(blog.imageUrl){
 
-                const oldPath = blog.imageUrl.replace('/',"");
+        //         const oldPath = blog.imageUrl.replace('/',"");
 
-                if(fs.existsSync(oldPath)){
-                    fs.unlinkSync(oldPath);
-                }
+        //         if(fs.existsSync(oldPath)){
+        //             fs.unlinkSync(oldPath);
+        //         }
+        //     }
+
+        //     blog.imageUrl = `/uploads/${req.file.filename}`;
+        // }
+
+       if(req.file){
+
+            if(blog.imagePublicId){
+
+                await cloudinary.uploader.destroy(blog.imagePublicId);
             }
 
-            blog.imageUrl = `/uploads/${req.file.filename}`;
-        }
+            blog.imageUrl = req.file.path;
+            blog.imagePublicId = req.file.filename;
+       }
+
         await blog.save();
 
         res.status(200).json({
@@ -136,6 +149,10 @@ const deleteBlog = asynchandler(async(req:AuthRequest, res:Response)=>{
                 message:"Forbidden"
             })
             return;
+        }
+
+        if(blog.imagePublicId){
+            await cloudinary.uploader.destroy(blog.imagePublicId);
         }
 
         await blog.deleteOne();
