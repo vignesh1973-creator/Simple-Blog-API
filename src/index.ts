@@ -6,6 +6,11 @@ import cors from 'cors';
 import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './config/swagger.js';
 import authRoutes from './routes/authRoutes.js'
+import morgan from 'morgan';
+import path from 'path';
+import blogRoutes from './routes/blogRoutes.js'
+
+
 dotenv.config()
 
 
@@ -15,15 +20,17 @@ const port = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
+app.use(morgan('dev'));
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
-
-ConnectDB()
+ConnectDB();
 
 
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 
 app.use('/api/auth', authRoutes)
+app.use('/api/blogs', blogRoutes)
 
 
 app.get('/',(req,res)=>{
@@ -31,10 +38,6 @@ app.get('/',(req,res)=>{
         message:'hllo'
     })
 })
-
-
-
-
 
 app.use(errHandler)
 
